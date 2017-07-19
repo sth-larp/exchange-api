@@ -120,12 +120,12 @@ function createMailboxes(data: MailboxData[]): any {
         .then(output => {
             currentTask.response = JSON.parse(output);
 
-            console.log("PS Command finished, result: " + JSON.stringify(currentTask.response));
+            winston.info("PS Command finished, result: " + JSON.stringify(currentTask.response));
             ps.dispose();
             currentTask.state = "Completed";
         })
         .catch(err => {
-            console.log(`PS Command error: ${err}`);
+            winston.err(`PS Command error: ${err}`);
             ps.dispose();
             currentTask.state = "Errors";
         });

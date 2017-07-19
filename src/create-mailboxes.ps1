@@ -51,9 +51,17 @@ $usersList.users | %{
             #Create Mailbox
 
             $mailbox = New-Mailbox -Name $sma -Password $pass -UserPrincipalName $upn -DisplayName $user.fullName `
-                -FirstName $user.firstName -LastName $user.lastName -Alias $user.login -OrganizationalUnit $OU -SamAccountName $sma -WarningAction SilentlyContinue
-    
-            Set-Mailbox $sma -ExtensionCustomAttribute1 $user.id -ExtensionCustomAttribute2 $user.password -HiddenFromAddressListsEnabled:$true -WarningAction SilentlyContinue | Out-Null
+                -FirstName $user.firstName -LastName $user.lastName -Alias $user.login -OrganizationalUnit $OU -SamAccountName $sma -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+            
+            if($?){
+                throw "Mailbox creation error"
+            }
+
+            Set-Mailbox $sma -ExtensionCustomAttribute1 $user.id -ExtensionCustomAttribute2 $user.password -HiddenFromAddressListsEnabled:$true -WarningAction SilentlyContinue -ErrorAction SilentlyContinue | Out-Null
+            
+            if($?){
+                throw "Mailbox set params error"
+            }
             
             $ret.users += @{ id = $user.id; login = $user.login; result = "created" }
         }else{
@@ -62,9 +70,17 @@ $usersList.users | %{
             if( ($mailbox.Alias -ne $user.login) -or ($mailbox.DisplayName -ne $user.fullName) -or ($mailbox.ExtensionCustomAttribute2 -ne $user.password) ) {
 
                 $mailbox | Set-Mailbox -Password $pass -UserPrincipalName $upn -DisplayName $user.fullName -ExtensionCustomAttribute2 $user.password`
-                    -Alias $user.login -WarningAction SilentlyContinue | Out-Null
+                    -Alias $user.login -WarningAction SilentlyContinue  -ErrorAction SilentlyContinue | Out-Null
+         
+                if($?){
+                    throw "Mailbox update error"
+                }
 
-                get-user $sma | Set-User -FirstName $user.firstName -LastName $user.lastName -WarningAction SilentlyContinue | out-null
+                get-user $sma | Set-User -FirstName $user.firstName -LastName $user.lastName  -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | out-null
+
+                if($?){
+                    throw "AD Uset update error"
+                }
 
                 $ret.users += @{ id = $user.id; login = $user.login; result = "updated" }
             }else{
@@ -73,7 +89,7 @@ $usersList.users | %{
         }
     } 
     catch {
-        $ret.users += @{ id = $user.id; login = $user.login; result = "error" }
+        $ret.users += @{ id = $user.id; login = $user.login; result = $_.Exception }
         $ret.status = "error"
     }
 }

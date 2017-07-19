@@ -1,6 +1,6 @@
 export const config = { 
         port : 8100,
-        logFileName: "import-server.log",
+        logFileName: "exchange-api.log",
         tempFileName: "mailboxData.json"
     };
 

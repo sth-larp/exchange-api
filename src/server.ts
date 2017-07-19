@@ -134,9 +134,13 @@ function createMailboxes(data: MailboxData[]): any {
 }
 
 function configureLogger(){
-    winston.add(winston.transports.File, { filename: config.logFileName });
+    winston.add(winston.transports.File, { 
+                filename: config.logFileName,
+                level: 'debug',
+                json: false
+            });
     winston.handleExceptions(new winston.transports.File({
-                 filename: 'path/to/exceptions.log',
+                filename: config.logFileName ,
                 handleExceptions: true,
                 humanReadableUnhandledException: true,
                 level: 'debug',

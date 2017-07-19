@@ -64,7 +64,7 @@ if(params.id || params.test){
     app.use(bodyParser.json())
 
     app.use((err, req, res, next) => {
-        console.log("Incorrect request: " + err)
+        winston.err("Incorrect request: " + err)
         res.status(400).json({code: 400, message: "Incorrect body playload format"});
     });
 
@@ -76,8 +76,10 @@ if(params.id || params.test){
 
     app.post('/mailbox', function (req, res) {
         if(req.body && req.body.users){
-             res.status(200).json(createMailboxes(req.body.users));
+            winston.info("Request: " + req.url + ", data: " + JSON.stringify(req.body));
+            res.status(201).json(createMailboxes(req.body.users));
         }else{
+            winston.err("Incorrect Request: " + req.url + ", data: " + req.body);    
             res.status(400).json({code: 400, message: "Incorrect body playload format"});
         }
     });
@@ -108,22 +110,27 @@ function createMailboxes(data: MailboxData[]): any {
         noProfile: true
     });
 
-    ps.addCommand(`./src/create-mailboxes.ps1 -InputFile ${config.tempFileName}`);
+    let command  = `./src/create-mailboxes.ps1 -InputFile ${config.tempFileName}`;
+
+    ps.addCommand(command);
+
+    winston.info(`Run PS command: ${command}`);
+
     ps.invoke()
         .then(output => {
             currentTask.response = JSON.parse(output);
 
-            console.log(JSON.stringify(currentTask.response));
+            console.log("PS Command finished, result: " + JSON.stringify(currentTask.response));
             ps.dispose();
             currentTask.state = "Completed";
         })
         .catch(err => {
-            console.log(err);
+            console.log(`PS Command error: ${err}`);
             ps.dispose();
-             currentTask.state = "Errors";
+            currentTask.state = "Errors";
         });
 
-    return {result: 200, message: `Accepted ${data.length} create/update requests` };
+    return {result: 201, message: `Accepted ${data.length} create/update requests` };
 }
 
 function configureLogger(){

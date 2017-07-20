@@ -13,7 +13,7 @@ $login = "alice\andy"
 $password = "de@sEx2@!7"
 $OU = "OU=Users,OU=Org,DC=alice,DC=local"
 
-$usersList  = Get-Content -Path $InputFile | Out-String | ConvertFrom-Json
+$usersList  = Get-Content -Path $InputFile -Encoding UTF8 | Out-String | ConvertFrom-Json
 
 $secPassword = $password | ConvertTo-SecureString -AsPlainText -Force
 $creds = new-object -typename System.Management.Automation.PSCredential -argumentlist $login, $secPassword
@@ -61,6 +61,11 @@ $usersList.users | %{
 
             Set-Mailbox $sma -ExtensionCustomAttribute1 $user.id -ExtensionCustomAttribute2 $user.password -HiddenFromAddressListsEnabled:$true -WarningAction SilentlyContinue -ErrorAction SilentlyContinue | Out-Null
           
+            
+            Start-Sleep -s 1
+            Set-MailboxRegionalConfiguration $sma -Language ru-RU -TimeZone "Russian Standard Time"
+
+
             $ret.users += @{ id = $user.id; login = $user.login; result = "created" }
         }else{
             #update Mailbox
@@ -89,6 +94,6 @@ $usersList.users | %{
 }
 
 
-Remove-Item -Path $InputFile -Force | Out-Null
+#Remove-Item -Path $InputFile -Force | Out-Null
 
 $ret | ConvertTo-Json | Write-Host

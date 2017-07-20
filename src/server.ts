@@ -64,7 +64,7 @@ if(params.id || params.test){
     app.use(bodyParser.json())
 
     app.use((err, req, res, next) => {
-        winston.err("Incorrect request: " + err)
+        winston.error("Incorrect request: " + err)
         res.status(400).json({code: 400, message: "Incorrect body playload format"});
     });
 
@@ -125,7 +125,7 @@ function createMailboxes(data: MailboxData[]): any {
             currentTask.state = "Completed";
         })
         .catch(err => {
-            winston.err(`PS Command error: ${err}`);
+            winston.error(`PS Command error: ${err}`);
             ps.dispose();
             currentTask.state = "Errors";
         });

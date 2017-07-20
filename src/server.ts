@@ -79,7 +79,7 @@ if(params.id || params.test){
             winston.info("Request: " + req.url + ", data: " + JSON.stringify(req.body));
             res.status(201).json(createMailboxes(req.body.users));
         }else{
-            winston.err("Incorrect Request: " + req.url + ", data: " + req.body);    
+            winston.error("Incorrect Request: " + req.url + ", data: " + req.body);    
             res.status(400).json({code: 400, message: "Incorrect body playload format"});
         }
     });

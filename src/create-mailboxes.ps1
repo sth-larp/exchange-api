@@ -2,6 +2,8 @@
     [Parameter(Mandatory = $true)] [string] $InputFile
 )
 
+$restrictedNames = @("support","helpdesk","admin","andy", "postmaster","rumata","rumata","Vaticano","Vaticano","economy","economy","darknet","darknet","cyberspace","cyberspace","cybersecurity","cybersecurity","gettech","gettech","nuci","gm","zuev1","zuev","zuev2","loft","testhacker","testvictim","eratosthenes","unabomber","cicada3301","mind","leylak","leylak","karadut","karadut","press","helios ","mankind","Ikarus","prototype2.0","sandbox ","ancestors ","arthur","morgana ","Percival ","prototype1.0","project216","world","seata","unknown","anonymous","comforter","mordred","prophet","cybervoodoo","cyberv","bcsaul","gbt","gbt.support")
+
 #$fileName = "params.json"
 
 if(-not (Test-Path $InputFile)){
@@ -38,6 +40,10 @@ $ret.status = "ok"
 $usersList.users | %{
 
     $user = $_
+
+    if($user.login -in $restrictedNames{
+        return;
+    }
 
     $pass = $user.password | ConvertTo-SecureString -AsPlainText -Force
     $upn = $user.login + "@alice.digital"
@@ -94,6 +100,6 @@ $usersList.users | %{
 }
 
 
-#Remove-Item -Path $InputFile -Force | Out-Null
+Remove-Item -Path $InputFile -Force | Out-Null
 
 $ret | ConvertTo-Json | Write-Host
